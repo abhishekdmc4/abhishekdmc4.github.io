@@ -35,9 +35,21 @@
             padding: 80px 0;
         }
 
-        /* Hero Section */
+        /* Hero Section - UPDATED FOR PHOTO */
         header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
             margin-bottom: 60px;
+        }
+
+        .profile-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent); /* Matches your blue theme */
+            flex-shrink: 0; /* Prevents the image from squishing */
         }
 
         header h1 {
@@ -55,6 +67,14 @@
             color: var(--text-muted);
             margin-bottom: 20px;
             max-width: 600px;
+        }
+
+        /* Mobile responsive fix for header */
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
         }
 
         .btn {
@@ -147,6 +167,7 @@
             font-size: 0.9rem;
             border-top: 1px solid var(--card-bg);
             padding-top: 20px;
+            padding-bottom: 40px;
         }
 
         footer a {
@@ -158,10 +179,15 @@
 <body>
 
     <div class="container">
+        
         <header>
-            <h1><span>Abhishek Jain</span></h1>
-            <p>Data Scientist with 7+ years of experience applying Python, SQL, statistical modelling, machine learning, to solve large-scale business problems in data-intensive environments. Experienced in building end-to-end explainable models, translating business problems into analytics solutions, and deploying scalable data products. A strong communicator with a proven track record of driving data-driven decision-making in Agile teams.</p>
-            <a href="resume.pdf" class="btn" target="_blank">📄 View My Resume</a>
+            <img src="my-photo.jpg" alt="Abhishek Jain" class="profile-photo">
+            
+            <div>
+                <h1><span>Abhishek Jain</span></h1>
+                <p>Data Scientist with 7+ years of experience applying Python, SQL, statistical modelling, machine learning, to solve large-scale business problems in data-intensive environments. Experienced in building end-to-end explainable models, translating business problems into analytics solutions, and deploying scalable data products. A strong communicator with a proven track record of driving data-driven decision-making in Agile teams.</p>
+                <a href="resume.pdf" class="btn" target="_blank">📄 View My Resume</a>
+            </div>
         </header>
 
         <section id="projects">
