@@ -35,7 +35,7 @@
             padding: 80px 0;
         }
 
-        /* Hero Section - UPDATED FOR PHOTO */
+        /* Hero Section */
         header {
             display: flex;
             align-items: center;
@@ -48,8 +48,8 @@
             height: 150px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--accent); /* Matches your blue theme */
-            flex-shrink: 0; /* Prevents the image from squishing */
+            border: 3px solid var(--accent);
+            flex-shrink: 0;
         }
 
         header h1 {
@@ -72,7 +72,7 @@
         /* Mobile responsive fix for header */
         @media (max-width: 600px) {
             header {
-                flex-direction: column;
+                flex-direction: column-reverse; /* Keeps the photo on top for mobile */
                 text-align: center;
             }
         }
@@ -108,11 +108,21 @@
             margin-bottom: 60px;
         }
 
+        /* Card Styling & Hover Effects */
         .project-card {
             background-color: var(--card-bg);
             padding: 24px;
             border-radius: 8px;
             border: 1px solid #334155;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
         }
 
         .project-card h3 {
@@ -124,6 +134,13 @@
             color: var(--text-muted);
             font-size: 0.95rem;
             margin-bottom: 15px;
+        }
+
+        /* Wrapper to make the whole card a link cleanly */
+        .card-link-wrapper {
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
 
         .tags {
@@ -181,57 +198,63 @@
     <div class="container">
         
         <header>
-            <img src="my-photo.jpg" alt="Abhishek Jain" class="profile-photo">
-            
             <div>
                 <h1><span>Abhishek Jain</span></h1>
                 <p>Data Scientist with 7+ years of experience applying Python, SQL, statistical modelling, machine learning, to solve large-scale business problems in data-intensive environments. Experienced in building end-to-end explainable models, translating business problems into analytics solutions, and deploying scalable data products. A strong communicator with a proven track record of driving data-driven decision-making in Agile teams.</p>
                 <a href="resume.pdf" class="btn" target="_blank">📄 View My Resume</a>
             </div>
+            
+            <img src="my-photo.jpg" alt="Abhishek Jain" class="profile-photo">
         </header>
 
         <section id="projects">
             <h2>Featured Work</h2>
             <div class="projects-grid">
                 
-                <div class="project-card">
-                    <h3><a href="https://abhishek-pdf-rag-chatbot.streamlit.app/" style="color: #FFD700; text-decoration: none;">⚡ Smart PDF RAG Chatbot</a></h3>
-                    <p>A lightning-fast Streamlit application powered by Groq (Llama-3.3-70B), LangChain, and local FAISS vector storage. Allows users to query complex PDFs with zero API costs.</p>
-                    <div class="tags">
-                        <span class="tag">Python</span>
-                        <span class="tag">LangChain</span>
-                        <span class="tag">Groq</span>
-                        <span class="tag">GenAI</span>
-                        <span class="tag">Streamlit</span>
+                <a href="https://abhishek-pdf-rag-chatbot.streamlit.app/" class="card-link-wrapper" target="_blank">
+                    <div class="project-card">
+                        <h3 style="color: #FFD700;">⚡ Smart PDF RAG Chatbot</h3>
+                        <p>A lightning-fast Streamlit application powered by Groq (Llama-3.3-70B), LangChain, and local FAISS vector storage. Allows users to query complex PDFs with zero API costs.</p>
+                        <div class="tags">
+                            <span class="tag">Python</span>
+                            <span class="tag">LangChain</span>
+                            <span class="tag">Groq</span>
+                            <span class="tag">GenAI</span>
+                            <span class="tag">Streamlit</span>
+                        </div>
                     </div>
-                </div>
+                </a>
 
-                <div class="project-card">
-                    <h3><a href="https://github.com/abhishekdmc4/Household-Electric-Power-Load-Prediction/blob/main/Source_code.ipynb" style="color: #FFD700; text-decoration: none;">📈 Energy Demand Forecasting</a></h3>
-                    <p>Built and evaluated custom transformer model for time series prediction. Comparison with baselines like ARIMA, XGboost and advanced models like LSTMs, Bi-LSTMs, GRU, TSmixer to validate the efficiency.</p>
-                    <div class="tags">
-                        <span class="tag">PyTorch</span>
-                        <span class="tag">Transformers</span>
-                        <span class="tag">ARIMA</span>
-                        <span class="tag">XGboost</span>
-                        <span class="tag">LSTM</span>
-                        <span class="tag">Bi-LSTM</span>
-                        <span class="tag">GRU</span>
-                        <span class="tag">TSmixer</span>
-                        <span class="tag">TFT</span>
-                        <span class="tag">Time-Series</span>
+                <a href="https://github.com/abhishekdmc4/Household-Electric-Power-Load-Prediction/blob/main/Source_code.ipynb" class="card-link-wrapper" target="_blank">
+                    <div class="project-card">
+                        <h3 style="color: #FFD700;">📈 Energy Demand Forecasting</h3>
+                        <p>Built and evaluated custom transformer model for time series prediction. Comparison with baselines like ARIMA, XGboost and advanced models like LSTMs, Bi-LSTMs, GRU, TSmixer to validate the efficiency.</p>
+                        <div class="tags">
+                            <span class="tag">PyTorch</span>
+                            <span class="tag">Transformers</span>
+                            <span class="tag">ARIMA</span>
+                            <span class="tag">XGboost</span>
+                            <span class="tag">LSTM</span>
+                            <span class="tag">Bi-LSTM</span>
+                            <span class="tag">GRU</span>
+                            <span class="tag">TSmixer</span>
+                            <span class="tag">TFT</span>
+                            <span class="tag">Time-Series</span>
+                        </div>
                     </div>
-                </div>
+                </a>
 
-<div class="project-card">
-    <h3><a href="articles/transformer.html" style="color: #FFD700; text-decoration: none;">🧠 Math Behind Transformers</a></h3>
-    <p>Transformers look scary, but they are mostly matrix multiplication! A breakdown of the linear algebra and non-linear functions powering LLMs.</p>
-    <div class="tags">
-        <span class="tag">Deep Learning</span>
-        <span class="tag">Mathematics</span>
-        <span class="tag">LLMs</span>
-    </div>
-</div>
+                <a href="articles/transformer.html" class="card-link-wrapper">
+                    <div class="project-card">
+                        <h3 style="color: #FFD700;">🧠 Math Behind Transformers</h3>
+                        <p>Transformers look scary, but they are mostly matrix multiplication! A breakdown of the linear algebra and non-linear functions powering LLMs.</p>
+                        <div class="tags">
+                            <span class="tag">Deep Learning</span>
+                            <span class="tag">Mathematics</span>
+                            <span class="tag">LLMs</span>
+                        </div>
+                    </div>
+                </a>
 
             </div>
         </section>
