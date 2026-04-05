@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serving ML Models at Scale | Abhishek Jain</title>
+    <style>
+        /* Base Styles (Matches your main page) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        :root { --bg-color: #0f172a; --text-main: #f8fafc; --text-muted: #94a3b8; --accent: #38bdf8; --card-bg: #1e293b; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); line-height: 1.8; padding: 0 20px; }
+        .container { max-width: 800px; margin: 0 auto; padding: 60px 0; }
+        
+        /* Navigation */
+        .back-link { color: var(--accent); text-decoration: none; display: inline-block; margin-bottom: 40px; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+        
+        /* Article Typography */
+        h1 { font-size: 2.5rem; margin-bottom: 20px; line-height: 1.2; }
+        h2 { font-size: 1.5rem; color: var(--accent); margin-top: 50px; margin-bottom: 15px; border-bottom: 1px solid var(--card-bg); padding-bottom: 10px; }
+        p { color: var(--text-muted); margin-bottom: 20px; font-size: 1.1rem; }
+        
+        /* Image Styling */
+        .article-image {
+            width: 100%;
+            border-radius: 8px;
+            margin: 30px 0;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Syntax Highlighted Code Blocks */
+        pre {
+            background-color: #0a0f1c;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid #334155;
+            margin: 25px 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            color: #f8fafc;
+        }
+        .c-keyword { color: #c678dd; } /* Purple for keywords */
+        .c-func { color: #61afef; }   /* Blue for functions */
+        .c-string { color: #98c379; } /* Green for strings */
+        .c-comment { color: #64748b; font-style: italic; } /* Gray for comments */
+        .c-class { color: #e5c07b; }  /* Yellow for classes */
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="../" class="back-link">← Back to Portfolio</a>
+        
+        <h1>Beyond the Notebook: Serving ML Models at Scale</h1>
+        
+        <p>A Jupyter Notebook is a fantastic place for a Data Scientist to experiment, visualize, and train. But a model living in a `.ipynb` file provides zero value to a business. To actually drive decision-making, a model must be accessible, scalable, and monitored.</p>
+        
+        <p>Over my career building end-to-end data products, I have found that bridging the gap between Data Science and Software Engineering is critical. Here is a practical breakdown of how to take a model from a local environment and serve it robustly in production.</p>
+
+        <img src="mlops-architecture.png" alt="End to End MLOps Architecture" class="article-image">
+
+        <h2>1. The API Layer (FastAPI)</h2>
+        <p>Software engineers don't want to deal with pickled models, Pandas DataFrames, or PyTorch tensors. They want to send a JSON payload and receive a JSON response. <strong>FastAPI</strong> has become the industry standard for this over Flask due to its asynchronous capabilities and automatic data validation via Pydantic.</p>
+
+        <p>Here is a minimal, production-ready example of wrapping a trained model into a REST API:</p>
+
+<pre><code><span class="c-keyword">from</span> fastapi <span class="c-keyword">import</span> FastAPI, HTTPException
+<span class="c-keyword">from</span> pydantic <span class="c-keyword">import</span> BaseModel
+<span class="c-keyword">import</span> joblib
+
+<span class="c-comment"># 1. Initialize app and load the model into memory upon startup</span>
+app = FastAPI(title=<span class="c-string">"Demand Forecasting API"</span>)
+model = joblib.load(<span class="c-string">"model_v1.pkl"</span>)
+
+<span class="c-comment"># 2. Define the exact data schema expected from the client</span>
+<span class="c-keyword">class</span> <span class="c-class">PredictRequest</span>(BaseModel):
+    temperature: <span class="c-func">float</span>
+    day_of_week: <span class="c-func">int</span>
+    historical_load: <span class="c-func">list</span>[<span class="c-func">float</span>]
+
+<span class="c-comment"># 3. Create the prediction endpoint</span>
+<span class="c-keyword">@app.post</span>(<span class="c-string">"/predict"</span>)
+<span class="c-keyword">def</span> <span class="c-func">make_prediction</span>(request: PredictRequest):
+    <span class="c-keyword">try</span>:
+        <span class="c-comment"># Feature engineering/preprocessing would happen here</span>
+        prediction = model.predict([[request.temperature, request.day_of_week]])
+        <span class="c-keyword">return</span> {<span class="c-string">"status"</span>: <span class="c-string">"success"</span>, <span class="c-string">"forecast"</span>: <span class="c-func">float</span>(prediction[0])}
+    <span class="c-keyword">except</span> <span class="c-class">Exception</span> <span class="c-keyword">as</span> e:
+        <span class="c-keyword">raise</span> HTTPException(status_code=<span class="c-func">500</span>, detail=<span class="c-func">str</span>(e))
+</code></pre>
+
+        <h2>2. Containerization (Docker)</h2>
+        <p>The most dreaded phrase in engineering is <em>"It works on my machine."</em> To ensure your API runs exactly the same on your local laptop, a testing server, and the production cloud cluster, we use <strong>Docker</strong>.</p>
+        <p>A <code>Dockerfile</code> provides the recipe to build a lightweight, isolated Linux environment containing only your Python code, your model, and your exact library versions.</p>
+
+<pre><code><span class="c-comment"># Use a lightweight Python base image</span>
+<span class="c-keyword">FROM</span> python:3.9-slim
+
+<span class="c-comment"># Set the working directory inside the container</span>
+<span class="c-keyword">WORKDIR</span> /app
+
+<span class="c-comment"># Copy dependencies and install them first (Optimizes Docker layer caching)</span>
+<span class="c-keyword">COPY</span> requirements.txt .
+<span class="c-keyword">RUN</span> pip install --no-cache-dir -r requirements.txt
+
+<span class="c-comment"># Copy the rest of the application (model files, app.py)</span>
+<span class="c-keyword">COPY</span> . .
+
+<span class="c-comment"># Expose the port FastAPI will run on</span>
+<span class="c-keyword">EXPOSE</span> 8000
+
+<span class="c-comment"># Command to run the application using Uvicorn</span>
+<span class="c-keyword">CMD</span> ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+</code></pre>
+
+        <h2>3. CI/CD and Cloud Deployment</h2>
+        <p>Once containerized, the deployment process becomes highly automated. Using <strong>GitHub Actions</strong>, you can create a pipeline that triggers every time you push code to the `main` branch. This pipeline will:</p>
+        <ol>
+            <li>Run unit tests (e.g., verifying model accuracy hasn't degraded).</li>
+            <li>Build the new Docker image.</li>
+            <li>Push the image to a registry (like AWS ECR or Docker Hub).</li>
+            <li>Trigger the cloud provider (AWS SageMaker, ECS, or Google Cloud Run) to pull the new image and seamlessly route traffic to it.</li>
+        </ol>
+
+        <h2>4. The Crucial Step: Post-Deployment Monitoring</h2>
+        <p>Unlike traditional software, Machine Learning models degrade over time. The world changes, but the model's weights remain frozen. This makes monitoring the final, and arguably most important, step of MLOps.</p>
+        
+        <img src="model-drift.png" alt="Visualizing Data Drift and Concept Drift" class="article-image">
+
+        <ul>
+            <li><strong>Data Drift:</strong> The input data has fundamentally changed. (e.g., You trained a financial model in 2019, but COVID-19 drastically altered purchasing behavior in 2020).</li>
+            <li><strong>Concept Drift:</strong> The relationship between the input and output has changed. (e.g., Inflation causes housing prices to rise, even if the house's features remain identical).</li>
+        </ul>
+        <p>By logging every request and prediction payload (using tools like Prometheus, Grafana, or Evidently AI), we can set up automated alerts. When the distribution of incoming API requests strays too far from our original training data, the system flags the team that it is time to retrain.</p>
+
+        <p style="margin-top: 40px; font-weight: 600; color: var(--text-main);">Building the model is the science. Deploying it reliably is the engineering. Combining both is how you generate real business value.</p>
+
+    </div>
+
+</body>
+</html>
