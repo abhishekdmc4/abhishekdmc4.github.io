@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced RAG: Chunking and Hybrid Search | Abhishek Jain</title>
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* Base Styles (Matches your main page) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        :root { --bg-color: #0f172a; --text-main: #f8fafc; --text-muted: #94a3b8; --accent: #38bdf8; --card-bg: #1e293b; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); line-height: 1.8; padding: 0 20px; }
+        .container { max-width: 800px; margin: 0 auto; padding: 60px 0; }
+        
+        /* Navigation */
+        .back-link { color: var(--accent); text-decoration: none; display: inline-block; margin-bottom: 40px; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+        
+        /* Article Typography */
+        h1 { font-size: 2.5rem; margin-bottom: 20px; line-height: 1.2; }
+        h2 { font-size: 1.5rem; color: var(--accent); margin-top: 50px; margin-bottom: 15px; border-bottom: 1px solid var(--card-bg); padding-bottom: 10px; }
+        h3 { font-size: 1.2rem; color: #f8fafc; margin-top: 30px; margin-bottom: 10px; }
+        p { color: var(--text-muted); margin-bottom: 20px; font-size: 1.1rem; }
+        
+        /* List Styling */
+        ol, ul { color: var(--text-muted); margin-bottom: 20px; padding-left: 20px; font-size: 1.1rem; }
+        li { margin-bottom: 10px; }
+
+        /* Image Styling */
+        .article-image {
+            width: 100%;
+            border-radius: 8px;
+            margin: 30px 0;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Syntax Highlighted Code Blocks */
+        pre {
+            background-color: #0a0f1c;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid #334155;
+            margin: 25px 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            color: #f8fafc;
+        }
+        .c-keyword { color: #c678dd; } /* Purple */
+        .c-func { color: #61afef; }   /* Blue */
+        .c-string { color: #98c379; } /* Green */
+        .c-comment { color: #64748b; font-style: italic; } /* Gray */
+        .c-class { color: #e5c07b; }  /* Yellow */
+
+        /* Highlight Box */
+        .note-box {
+            background-color: rgba(56, 189, 248, 0.1);
+            padding: 20px;
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            margin: 25px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="../" class="back-link">← Back to Portfolio</a>
+        
+        <h1>Why Your RAG Pipeline is Failing: Moving Beyond the Basics</h1>
+        
+        <p>Building a basic Retrieval-Augmented Generation (RAG) app takes 10 lines of LangChain code. You load a PDF, split it into 1000-character chunks, shove it into FAISS, and query OpenAI. It looks like magic in a demo.</p>
+        
+        <p>But when you push it to production, it fails. The LLM hallucinates, misses obvious answers, and provides incomplete context. Why? Because <strong>RAG is not an LLM problem; it is an Information Retrieval problem.</strong> Here is how to fix the most common pipeline failures using advanced chunking and hybrid search.</p>
+
+        <h2>1. The Problem with Naive Chunking</h2>
+        <p>The standard tutorial approach is <code>RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)</code>. This is equivalent to taking a pair of scissors and blindly cutting a book into exact 1000-character rectangles, regardless of where the sentences end.</p>
+        
+        <p>If your scissor cut happens to slice right through the middle of a crucial paragraph, the semantic meaning is destroyed. The embedding model generates a vector for garbage text, and the search fails.</p>
+
+        <h3>The Solution: Semantic Chunking</h3>
+        <p>Instead of splitting by character count, we should split by <em>meaning</em>. Semantic chunking calculates the cosine distance between sentences. If the distance spikes, it means the topic has changed, and that is where we make our cut.</p>
+
+<pre><code><span class="c-keyword">from</span> langchain_experimental.text_splitter <span class="c-keyword">import</span> SemanticChunker
+<span class="c-keyword">from</span> langchain_openai.embeddings <span class="c-keyword">import</span> OpenAIEmbeddings
+
+<span class="c-comment"># Initialize the embedding model to measure sentence similarity</span>
+embeddings = OpenAIEmbeddings()
+
+<span class="c-comment"># Split only when the semantic meaning shifts significantly</span>
+text_splitter = SemanticChunker(
+    embeddings, 
+    breakpoint_threshold_type=<span class="c-string">"percentile"</span>,
+    breakpoint_threshold_amount=<span class="c-func">95</span>
+)
+
+docs = text_splitter.create_documents([raw_text])
+</code></pre>
+
+        <img src="semantic-chunking.png" alt="Semantic Chunking vs Fixed-Size Chunking" class="article-image">
+
+        <h2>2. The Limits of Dense Vector Search</h2>
+        <p>Vector databases are incredible at understanding <em>concept</em>. If you search for "dogs," dense vectors will successfully retrieve documents about "canines" and "puppies."</p>
+        
+        <p>However, dense vectors are notoriously bad at <strong>exact keyword matching</strong>. If a user searches for a specific part number (e.g., "SKU-9942-X") or an obscure acronym, the semantic embedding might blur the exact characters, and the vector search will fail to retrieve the correct document.</p>
+
+        <h3>The Solution: Hybrid Search (Dense + Sparse)</h3>
+        <p>To get the best of both worlds, we use Hybrid Search. We run a <strong>Dense Search</strong> (Embeddings/FAISS) to capture semantic meaning, AND a <strong>Sparse Search</strong> (BM25/TF-IDF) to capture exact keyword matches. We then fuse the results using a weighting parameter, $\alpha$.</p>
+
+        <div style="background-color: var(--card-bg); padding: 15px; border-radius: 8px; margin: 15px 0; text-align: center;">
+            $$Hybrid\ Score = \alpha \times Dense\ Score + (1 - \alpha) \times Sparse\ Score$$
+        </div>
+
+        <p>Here is how you implement an Ensemble Retriever in LangChain:</p>
+
+<pre><code><span class="c-keyword">from</span> langchain.retrievers <span class="c-keyword">import</span> EnsembleRetriever
+<span class="c-keyword">from</span> langchain_community.retrievers <span class="c-keyword">import</span> BM25Retriever
+<span class="c-keyword">from</span> langchain_community.vectorstores <span class="c-keyword">import</span> FAISS
+
+<span class="c-comment"># 1. Sparse Retriever (Exact Keyword Match)</span>
+bm25_retriever = BM25Retriever.from_documents(docs)
+bm25_retriever.k = <span class="c-func">5</span>
+
+<span class="c-comment"># 2. Dense Retriever (Semantic Concept Match)</span>
+faiss_vectorstore = FAISS.from_documents(docs, embeddings)
+faiss_retriever = faiss_vectorstore.as_retriever(search_kwargs={<span class="c-string">"k"</span>: <span class="c-func">5</span>})
+
+<span class="c-comment"># 3. Combine them! Weight BM25 at 30% and Vectors at 70%</span>
+ensemble_retriever = EnsembleRetriever(
+    retrievers=[bm25_retriever, faiss_retriever], 
+    weights=[<span class="c-func">0.3</span>, <span class="c-func">0.7</span>]
+)
+</code></pre>
+
+        <h2>3. Lost in the Middle: The Need for Re-Ranking</h2>
+        <p>So, you've used Hybrid Search to retrieve the top 10 most relevant chunks. You stuff them all into the LLM prompt. Suddenly, the LLM hallucinates.</p>
+        
+        <p>Research shows that LLMs suffer from the <strong>"Lost in the Middle"</strong> phenomenon. They pay strong attention to the very first chunk and the very last chunk in the prompt, but completely ignore the context sandwiched in the middle.</p>
+
+        <div class="note-box">
+            <strong>The Solution: Cross-Encoder Re-Ranking</strong><br>
+            Instead of just feeding the retrieved chunks directly to the LLM, we pass them through a specialized, smaller model called a Re-Ranker (like Cohere or a HuggingFace Cross-Encoder). This model scores the exact relationship between the user's query and <em>each</em> chunk, reordering them so the absolute most critical information is placed at the top and bottom of the prompt context.
+        </div>
+
+        <h2>Conclusion</h2>
+        <p style="font-weight: 600; color: var(--text-main);">An LLM is only as smart as the context you feed it. By upgrading from naive chunking to semantic chunking, implementing Hybrid Search, and adding a Re-Ranker, you transition from building a brittle prototype to a robust, production-grade search engine.</p>
+
+    </div>
+
+</body>
+</html>
