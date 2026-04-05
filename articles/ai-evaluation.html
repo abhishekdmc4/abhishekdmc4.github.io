@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Anatomy of AI Evaluation | Abhishek Jain</title>
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* Base Styles (Matches your main page) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        :root { --bg-color: #0f172a; --text-main: #f8fafc; --text-muted: #94a3b8; --accent: #38bdf8; --card-bg: #1e293b; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); line-height: 1.8; padding: 0 20px; }
+        .container { max-width: 800px; margin: 0 auto; padding: 60px 0; }
+        
+        /* Navigation */
+        .back-link { color: var(--accent); text-decoration: none; display: inline-block; margin-bottom: 40px; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+        
+        /* Article Typography */
+        h1 { font-size: 2.5rem; margin-bottom: 20px; line-height: 1.2; }
+        h2 { font-size: 1.5rem; color: var(--accent); margin-top: 50px; margin-bottom: 15px; border-bottom: 1px solid var(--card-bg); padding-bottom: 10px; }
+        h3 { font-size: 1.2rem; color: #f8fafc; margin-top: 30px; margin-bottom: 10px; }
+        p { color: var(--text-muted); margin-bottom: 20px; font-size: 1.1rem; }
+        
+        /* List Styling */
+        ol, ul { color: var(--text-muted); margin-bottom: 20px; padding-left: 20px; font-size: 1.1rem; }
+        li { margin-bottom: 10px; }
+
+        /* Image Styling */
+        .article-image {
+            width: 100%;
+            border-radius: 8px;
+            margin: 30px 0;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Formula Container */
+        .formula-box {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        /* Important Note Box */
+        .note-box {
+            background-color: rgba(56, 189, 248, 0.1);
+            padding: 20px;
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            margin: 25px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="../" class="back-link">← Back to Portfolio</a>
+        
+        <h1>The Anatomy of AI Evaluation: Moving Beyond Accuracy</h1>
+        
+        <p>Training a model is only half the battle; evaluating it correctly is what determines its success in the real world. In the industry, a model boasting 99% accuracy can still be a catastrophic failure if it is optimizing for the wrong metric.</p>
+        <p>As we transition from classical Machine Learning (ML) to Natural Language Processing (NLP) and modern Large Language Models (LLMs), our evaluation frameworks must evolve. This guide breaks down the core metrics used across the industry, the mathematics behind them, and exactly when to use them.</p>
+
+        <h2>1. The Foundation: Classification Metrics</h2>
+        <p>Before diving into complex deep learning metrics, we must ground ourselves in the <strong>Confusion Matrix</strong>. It categorizes predictions into True Positives (TP), True Negatives (TN), False Positives (FP), and False Negatives (FN).</p>
+
+        <img src="confusion-matrix.png" alt="Visualizing the Confusion Matrix" class="article-image">
+
+        <h3>Accuracy</h3>
+        <p>Accuracy is the most intuitive metric, representing the ratio of correctly predicted observations to the total observations.</p>
+        <div class="formula-box">
+            $$Accuracy = \frac{TP + TN}{TP + TN + FP + FN}$$
+        </div>
+        <ul>
+            <li><strong>The Intuition:</strong> "Out of everything the model looked at, how many did it get right?"</li>
+            <li><strong>When to use it:</strong> Use accuracy <em>only</em> when your dataset is perfectly balanced and the cost of false positives and false negatives is roughly the same.</li>
+        </ul>
+
+        <h3>Precision</h3>
+        <p>Precision calculates the proportion of positive identifications that were actually correct.</p>
+        <div class="formula-box">
+            $$Precision = \frac{TP}{TP + FP}$$
+        </div>
+        <ul>
+            <li><strong>The Intuition:</strong> "When the model cries wolf, how often is there actually a wolf?" It measures the <em>quality</em> of your positive predictions.</li>
+            <li><strong>When to use it:</strong> When the cost of a <strong>False Positive</strong> is high (e.g., routing a highly important business email to the spam folder).</li>
+        </ul>
+
+        <h3>Recall (Sensitivity)</h3>
+        <p>Recall calculates the proportion of actual positives that were identified correctly.</p>
+        <div class="formula-box">
+            $$Recall = \frac{TP}{TP + FN}$$
+        </div>
+        <ul>
+            <li><strong>The Intuition:</strong> "Out of all the actual wolves out there, how many did the model find?" It measures the <em>quantity</em> of positive predictions.</li>
+            <li><strong>When to use it:</strong> When the cost of a <strong>False Negative</strong> is high (e.g., in medical diagnostics, missing a sick patient).</li>
+        </ul>
+
+        <h3>F1-Score</h3>
+        <p>The F1-Score is the harmonic mean of Precision and Recall.</p>
+        <div class="formula-box">
+            $$F1 = 2 \times \frac{Precision \times Recall}{Precision + Recall}$$
+        </div>
+        <ul>
+            <li><strong>The Intuition:</strong> A standard average treats all values equally, but a harmonic mean punishes extreme values. It forces the model to balance both precision and recall.</li>
+            <li><strong>When to use it:</strong> When you have an imbalanced dataset and need a single metric to evaluate performance.</li>
+        </ul>
+
+        <h2>2. Continuous & Deep Learning Errors</h2>
+        <p>When a model outputs continuous numbers (Regression) or probability distributions (Neural Networks), binary classification metrics no longer apply.</p>
+
+        <img src="loss-functions.png" alt="MSE vs MAE Loss Functions" class="article-image">
+
+        <h3>MSE & MAE</h3>
+        <div class="formula-box">
+            $$MSE = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2$$
+            $$MAE = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|$$
+        </div>
+        <ul>
+            <li><strong>MSE (Mean Squared Error):</strong> Squares the errors, meaning a prediction that is off by 10 points is penalized 100 times more than a prediction off by 1 point. Use when large outliers are catastrophic.</li>
+            <li><strong>MAE (Mean Absolute Error):</strong> Averages the absolute differences. Use when you want a robust metric that doesn't get skewed by a few massive outliers.</li>
+        </ul>
+
+        <h3>Cross-Entropy Loss (Log Loss)</h3>
+        <p>The standard loss function for classification in deep learning and Transformers.</p>
+        <div class="formula-box">
+            $$H(p, q) = -\sum_{x} p(x) \log q(x)$$
+        </div>
+        <div class="note-box">
+            <strong>The Intuition:</strong> It measures divergence. It doesn't just ask if the model was right or wrong; it asks <em>how confident</em> the model was. If a model is 99% confident that a picture of a dog is a cat, Cross-Entropy Loss heavily penalizes that arrogant mistake.
+        </div>
+
+        <h2>3. Legacy NLP Sequence Metrics</h2>
+        <p>Before the era of Generative AI, NLP tasks like machine translation and text summarization relied on exact-match overlap metrics.</p>
+
+        <img src="nlp-metrics.png" alt="BLEU and ROUGE NLP Metrics" class="article-image">
+
+        <ul>
+            <li><strong>BLEU:</strong> Measures how many words in the machine's output appear in a human reference text. It is essentially <strong>Precision</strong> for text. Historically the gold standard for Machine Translation.</li>
+            <li><strong>ROUGE:</strong> Measures how many words from the human reference text appeared in the machine's output. It is essentially <strong>Recall</strong> for text. The industry standard for Text Summarization evaluation.</li>
+        </ul>
+
+        <h2>4. The Generative Era: LLM & Transformer Metrics</h2>
+        <p>Evaluating modern Transformers (like GPT-4 or Llama 3) is uniquely challenging because there is no single "correct" response to an open-ended prompt.</p>
+
+        <img src="rag-evaluation.png" alt="RAGAS Evaluation Framework" class="article-image">
+
+        <h3>Perplexity</h3>
+        <p>Perplexity evaluates the quality of a language model's internal probability distribution during training. A lower perplexity means the model confidently predicts the next word correctly (it is less "surprised" by real human text).</p>
+
+        <h3>LLM-as-a-Judge</h3>
+        <p>Because semantic meaning cannot be captured by exact-word matches like BLEU, the industry now uses larger, superior LLMs to evaluate the outputs of smaller LLMs based on a custom grading rubric.</p>
+
+        <h3>RAGAS (Retrieval Augmented Generation Assessment)</h3>
+        <p>When building RAG systems, you must evaluate both the search engine and the LLM. RAGAS breaks this into distinct metrics:</p>
+        <ul>
+            <li><strong>Faithfulness:</strong> Did the LLM hallucinate, or did it stick strictly to the facts provided in the retrieved context?</li>
+            <li><strong>Answer Relevance:</strong> Did the generated answer actually address the user's initial prompt?</li>
+            <li><strong>Context Precision:</strong> Did the vector database retrieve the correct documents for the LLM to read in the first place?</li>
+        </ul>
+
+    </div>
+
+</body>
+</html>
