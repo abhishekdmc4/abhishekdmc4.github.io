@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Behind Transformers | Abhishek Jain</title>
+    <style>
+        /* Base Styles (Matches your main page) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        :root { --bg-color: #0f172a; --text-main: #f8fafc; --text-muted: #94a3b8; --accent: #38bdf8; --card-bg: #1e293b; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); line-height: 1.8; padding: 0 20px; }
+        .container { max-width: 800px; margin: 0 auto; padding: 60px 0; }
+        
+        /* Navigation */
+        .back-link { color: var(--accent); text-decoration: none; display: inline-block; margin-bottom: 40px; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+        
+        /* Article Typography */
+        h1 { font-size: 2.5rem; margin-bottom: 20px; line-height: 1.2; }
+        h2 { font-size: 1.5rem; color: var(--accent); margin-top: 40px; margin-bottom: 15px; border-bottom: 1px solid var(--card-bg); padding-bottom: 10px; }
+        p { color: var(--text-muted); margin-bottom: 20px; font-size: 1.1rem; }
+        
+        /* List Styling */
+        ol, ul { color: var(--text-muted); margin-bottom: 20px; padding-left: 20px; font-size: 1.1rem; }
+        li { margin-bottom: 10px; }
+
+        /* Image/GIF Styling */
+        .article-image {
+            width: 100%;
+            border-radius: 8px;
+            margin: 30px 0;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Custom Resource Box */
+        .resource-box {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-left: 4px solid #FFD700;
+            border-radius: 4px;
+            margin: 25px 0;
+        }
+        .resource-box strong { color: var(--text-main); display: block; margin-bottom: 8px; }
+        .resource-box a { color: #FFD700; text-decoration: none; font-weight: 600; word-break: break-all; }
+        .resource-box a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="../" class="back-link">← Back to Portfolio</a>
+        
+        <h1>The Math Behind Transformers</h1>
+        
+        <p>Transformer looks scary, but it is mostly matrix multiplication! Here are the must-understand linear algebra concepts and non-linear functions behind how LLMs work.</p>
+
+        <img src="your-image.gif" alt="Transformer Architecture Visualization" class="article-image">
+
+        <p>In a nutshell, modern deep learning models consist of repeatedly applying the following operations:</p>
+        <ol>
+            <li><strong>Matrix multiplication</strong> (Linear Algebra)</li>
+            <li><strong>Activation function</strong> (Non-linear transformation)</li>
+            <li><strong>Normalization/pooling</strong> (Simple Statistics)</li>
+        </ol>
+
+        <h2>Linear Algebra</h2>
+        <p>When we read about the billions of parameters that a model consists of, we talk about weights and biases, which are represented as a large collection of matrices and vectors.</p>
+        <p>Before the attention mechanism, an LLM first turns each token into a vector. Then most of the hard work that an AI performs is multiplying matrices with other matrices and vectors, which, at its core, performs many dot products.</p>
+        <p>Sounds confusing and needs a refresh? The key concepts you must understand: <strong>vectors, matrices, and dot products</strong>. Just high school math!</p>
+        
+        <div class="resource-box">
+            <strong>📌 Resource: Visual Linear Algebra Book</strong>
+            <a href="https://lnkd.in/eajFpHmS" target="_blank">View Guide →</a>
+        </div>
+
+        <h2>Non-linear Transformation</h2>
+        <p>In each layer in the network, between each matrix multiplication step, the AI must perform an activation function to introduce non-linearity. Without this step, stacking multiple layers would be pointless; it would just be one big linear transformation. The most common choices are Softmax, ReLu, sigmoid, and tanh functions.</p>
+
+        <div class="resource-box">
+            <strong>📌 Resource: Visual Guide to Activation Functions</strong>
+            <a href="https://lnkd.in/eHR46WVp" target="_blank">View Guide →</a>
+        </div>
+
+        <h2>Basic Statistics</h2>
+        <p>Lastly, some steps also perform simple statistics. In language models, we often normalize vectors (dividing by a number so that their length equals 1), or calculate min and max (e.g., max pooling in vision models).</p>
+
+        <div class="resource-box">
+            <strong>📌 Resource: Seeing Theory - Visual explanations of statistical concepts</strong>
+            <a href="https://lnkd.in/edqEbEsc" target="_blank">View Guide →</a>
+        </div>
+
+        <h2>Putting it all together</h2>
+        <p>Once you know all these, want to see how these three operations combine in real architectures? Here are the best videos explaining the mathematics of LLMs.</p>
+
+        <ul>
+            <li>📌 <strong>Visual book on transformer architecture:</strong> <a href="https://bbycroft.net/llm" target="_blank" style="color: #38bdf8;">bbycroft.net/llm</a></li>
+            <li>📌 <strong>Transformers, the tech behind LLMs (3Blue1Brown):</strong> <a href="https://lnkd.in/eSzbMnrj" target="_blank" style="color: #38bdf8;">Watch Video</a></li>
+        </ul>
+
+        <p style="margin-top: 40px; font-weight: 600; color: var(--text-main);">When you understand these three building blocks, attention and transformers stop feeling like magic. Which part of the math felt most abstract when you first learned it?</p>
+
+    </div>
+
+</body>
+</html>
